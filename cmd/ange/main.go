@@ -7,10 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/theobori/ange/internal/common"
 	"github.com/theobori/ange/internal/webring"
-	"github.com/theobori/fleur-form"
+	fleurform "github.com/theobori/fleur-form"
 	"github.com/theobori/fleur/gopher"
 	gserver "github.com/theobori/fleur/gopher/server"
 	"github.com/theobori/fleur/gophermap"
@@ -18,33 +19,22 @@ import (
 	"github.com/theobori/fleur/server"
 )
 
-func createSubmitCallback(w *webring.Webring) fleurform.SubmitCallback {
+func createWebringSubmitCallback(w *webring.Webring) fleurform.SubmitCallback {
 	return func(parameters fleurform.Parameters, server *server.Server, ctx *server.RequestContext) error {
-		for _, parameterName := range webring.GopherspaceEntryKeywords {
-			_, ok := parameters[parameterName]
-			if !ok {
-				return server.SendError(
-					ctx.Conn,
-					fmt.Sprintf("Missing the '%s' parameter.", parameterName),
-				)
-			}
-		}
-
 		port, err := strconv.Atoi(parameters["port"])
 		if err != nil {
 			return err
 		}
 
-		entry := webring.GopherspaceEntry{
-			Title:  parameters["title"],
-			Domain: parameters["domain"],
-			Port:   port,
-			Path:   parameters["path"],
+		path := "/" + strings.Trim(parameters["path"], "/")
+
+		gopherspace, err := webring.NewGopherspaceFromUserInput(parameters["title"], parameters["domain"], port, path)
+		if err != nil {
+			return server.SendError(ctx.Conn, err.Error())
 		}
 
-		node, err := w.Add(&entry)
+		id, err := w.AddForReview(gopherspace)
 		if err != nil {
-			fmt.Println(err)
 			return server.SendError(ctx.Conn, err.Error())
 		}
 
@@ -52,37 +42,105 @@ func createSubmitCallback(w *webring.Webring) fleurform.SubmitCallback {
 			server.NewItem(gophermap.ItemTypeInlineText, "You successfully submitted your gopherspace for a review.", "/"),
 			server.NewItem(gophermap.ItemTypeInlineText, "", "/"),
 			server.NewItem(gophermap.ItemTypeInlineText, "Make sure to remember your gopherspace id and token below:", "/"),
-			server.NewItem(gophermap.ItemTypeInlineText, fmt.Sprintf("Your ID: %d", node.Id), "/"),
-			server.NewItem(gophermap.ItemTypeInlineText, fmt.Sprintf("Your token: %s", node.Token), "/"),
+			server.NewItem(gophermap.ItemTypeInlineText, fmt.Sprintf("Your ID: %d", id), "/"),
+			server.NewItem(gophermap.ItemTypeInlineText, fmt.Sprintf("Your token: %s", gopherspace.Token), "/"),
 		)
 
 		return gserver.SendString(ctx.Conn, menu)
 	}
 }
 
-func RenderEntryList(w *webring.Webring) (string, error) {
+func createAdminPanelSubmitCallback(w *webring.Webring) fleurform.SubmitCallback {
+	return func(parameters fleurform.Parameters, server *server.Server, ctx *server.RequestContext) error {
+		if !w.IsAdmin(parameters["secret"]) {
+			return server.SendError(ctx.Conn, "You must be admin.")
+		}
+
+		id, err := strconv.Atoi(parameters["id"])
+		if err != nil {
+			return err
+		}
+
+		switch parameters["action"] {
+		case "deny":
+			err := w.Deny(id)
+			if err != nil {
+				return err
+			}
+			server.SendGophermap(ctx.Conn, gophermap.ItemTypeInlineText, fmt.Sprintf("You successfully denied the gopherspace with id '%d'.", id))
+		case "approve":
+			err := w.Approve(id)
+			if err != nil {
+				return err
+			}
+			server.SendGophermap(ctx.Conn, gophermap.ItemTypeInlineText, fmt.Sprintf("You successfully approved the gopherspace with id '%d'.", id))
+		default:
+			return fmt.Errorf("Invalid action value.")
+		}
+
+		return nil
+	}
+}
+
+func createNeighborRouteCallback(w *webring.Webring, isNext bool) server.RouteCallback {
+	var name string
+
+	if isNext {
+		name = "next"
+	} else {
+		name = "previous"
+	}
+
+	return func(server *server.Server, ctx *server.RequestContext) error {
+		idString := strings.TrimPrefix(ctx.VirtualPath, "/webring/"+name+"/")
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			return err
+		}
+
+		gopherspace, err := w.NeighborGopherspace(id, isNext)
+		if err != nil {
+			return err
+		}
+
+		return gserver.SendString(
+			ctx.Conn,
+			gopherspace.GophermapItem().String(),
+		)
+	}
+}
+
+func RenderGopherspacesList(w *webring.Webring, approved bool) (string, error) {
 	items := []*gophermap.Item{}
 
-	nodes, err := w.List()
+	gopherspaces, err := w.ListGopherspaces(approved)
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 
-	for _, node := range nodes {
+	for _, gopherspace := range gopherspaces {
 		item := gophermap.Item{
 			ItemType:    gophermap.ItemTypeGopherMenu,
-			Description: fmt.Sprintf("%04d %s", node.Id, node.Entry.Title),
-			Selector:    node.Entry.Path,
-			Domain:      node.Entry.Domain,
-			Port:        node.Entry.Port,
+			Description: fmt.Sprintf("%04d %s", gopherspace.Id, gopherspace.Title),
+			Selector:    gopherspace.Path,
+			Domain:      gopherspace.Domain,
+			Port:        gopherspace.Port,
 		}
 		items = append(items, &item)
 	}
 
 	if len(items) == 0 {
+		var description string
+		if approved {
+			description = "There are no gopherspaces in the webring."
+		} else {
+			description = "There are no gopherspaces that need review."
+		}
+
 		items = append(items, &gophermap.Item{
 			ItemType:    gophermap.ItemTypeInlineText,
-			Description: "The webring is empty",
+			Description: description,
 			Selector:    "/",
 			Domain:      "/",
 			Port:        0,
@@ -182,7 +240,7 @@ func main() {
 	em.Set(
 		"^>members",
 		func(e *evaluator.Evaluator, ctx *evaluator.ExtensionContext) (string, error) {
-			return RenderEntryList(w)
+			return RenderGopherspacesList(w, true)
 		},
 	)
 
@@ -190,8 +248,47 @@ func main() {
 	err = fleurform.AddFormToRouter(
 		router,
 		"/webring",
-		webring.GopherspaceEntryKeywords,
-		createSubmitCallback(w),
+		[]fleurform.ParameterMetadata{
+			{
+				Name:     "title",
+				Required: true,
+			},
+			{
+				Name:     "domain",
+				Required: true,
+			},
+			{
+				Name:     "port",
+				Required: true,
+			},
+			{
+				Name:     "path",
+				Required: true,
+			},
+		},
+		createWebringSubmitCallback(w),
+	)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = fleurform.AddFormToRouter(
+		router,
+		"/webring/adminpanel",
+		[]fleurform.ParameterMetadata{
+			{
+				Name:     "secret",
+				Required: true,
+			},
+			{
+				Name:     "id",
+				Required: true,
+			},
+			{
+				Name:     "action",
+				Required: true,
+			},
+		},
+		createAdminPanelSubmitCallback(w),
 	)
 	if err != nil {
 		log.Fatalln(err)
@@ -208,30 +305,22 @@ func main() {
 		},
 	)
 
-	// TODO: form admin avec id et secret
 	router.SetWithWeight(
 		1,
-		"^/webring/deny$",
+		"^/webring/adminpanel$",
 		func(server *server.Server, ctx *server.RequestContext) error {
-			return nil
-		},
-	)
-	router.SetWithWeight(
-		1,
-		"^/webring/accept$",
-		func(server *server.Server, ctx *server.RequestContext) error {
-			return nil
-		},
-	)
-	router.SetWithWeight(
-		1,
-		"^/webring/review$",
-		func(server *server.Server, ctx *server.RequestContext) error {
-			if len(ctx.SearchParameter) == 0 {
-				return server.SendError(ctx.Conn, "Missing search parameter.")
+			entryList, err := RenderGopherspacesList(w, false)
+			if err != nil {
+				return err
 			}
 
-			return nil
+			menu := gophermap.RenderMenu(
+				server.NewItem(gophermap.ItemTypeGopherMenu, "Access the form to review a gopherspace candidate.", "/webring/adminpanel/form"),
+				server.NewItem(gophermap.ItemTypeInlineText, "For the action field, you can enter 'deny' or 'approve'.", "/"),
+				server.NewItem(gophermap.ItemTypeInlineText, "", "/"),
+			) + "\n" + entryList
+
+			return gserver.SendString(ctx.Conn, menu)
 		},
 	)
 	router.SetWithWeight(
@@ -246,7 +335,6 @@ func main() {
 
 			err := w.Delete(token)
 			if err != nil {
-				fmt.Println(err)
 				return server.SendError(ctx.Conn, "An error occured. Are you sure it's your token?")
 			}
 
@@ -254,6 +342,31 @@ func main() {
 				ctx.Conn,
 				gophermap.ItemTypeInlineText,
 				fmt.Sprintf("You successfully deleted the gopherspace with token '%s'.", token),
+			)
+		},
+	)
+	router.SetWithWeight(
+		1,
+		"^/webring/next/.*$",
+		createNeighborRouteCallback(w, true),
+	)
+	router.SetWithWeight(
+		1,
+		"^/webring/previous/.*$",
+		createNeighborRouteCallback(w, false),
+	)
+	router.SetWithWeight(
+		1,
+		"^/webring/random$",
+		func(server *server.Server, ctx *server.RequestContext) error {
+			gopherspace, err := w.RandomGopherspace()
+			if err != nil {
+				return err
+			}
+
+			return gserver.SendString(
+				ctx.Conn,
+				gopherspace.GophermapItem().String(),
 			)
 		},
 	)
