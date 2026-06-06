@@ -1,0 +1,18 @@
+_____    ____    ____   ____  
+\__  \  /    \  / ___\_/ __ \ 
+ / __ \|   |  \/ /_/  >  ___/ 
+(____  /___|  /\___  / \___  >
+     \/     \//_____/      \/ 
+
+This is a Gopher web ring. It's a collection of gopherspace
+available via Internet, where each gopherspace is linked
+to two other gopherspaces.
+
+If you want to add your gopherspace to this web ring,
+you can use the link below. Your submission will be reviewed.
+1Add your gopherspace	/webring/form	localhost	7070
+
+Also if you want to remove you gopherspace from the ring.
+7Remove your gopherspace	/webring/delete	localhost	7070
+
+>members
