@@ -5,7 +5,7 @@ buildGoModule {
 
   src = ./.;
 
-  vendorHash = "sha256-3Glc/5N4/Liq//AHJHwMNbRABoPfjDZxqXZqt6AG0CA=";
+  vendorHash = "sha256-Lu25iyDQe+puKTSKHxYF2tSbWQajGmI9AInZ7Y0ZSMI=";
 
   ldflags = [
     "-s"
@@ -13,7 +13,7 @@ buildGoModule {
   ];
 
   meta = {
-    description = "Gopher webring based on fleur ";
+    description = "Gopher webring based on fleur";
     homepage = "https://github.com/theobori/ange";
     license = lib.licenses.mit;
     mainProgram = "fleur";
