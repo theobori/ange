@@ -39,11 +39,5 @@
           formatting = treefmtEval.config.build.check self;
         };
       }
-    )
-    // {
-      nixosModules = {
-        fleur = import ./nixos/fleur.nix;
-        default = self.nixosModules.fleur;
-      };
-    };
+    );
 }
