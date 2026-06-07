@@ -5,7 +5,7 @@ buildGoModule {
 
   src = ./.;
 
-  vendorHash = "sha256-jEoCS9DZcdp0g8x7OSDucqRucwF0bMdkBJh3zZ2g96c=";
+  vendorHash = "sha256-w50DtGiFVP3g59927fgOoNNIBzEm0yv1q+GXk4G0PKI=";
 
   ldflags = [
     "-s"
@@ -13,8 +13,8 @@ buildGoModule {
   ];
 
   meta = {
-    description = "KISS RFC1436 Gopher application framework and CLI ";
-    homepage = "https://github.com/theobori/fleur";
+    description = "Gopher webring based on fleur ";
+    homepage = "https://github.com/theobori/ange";
     license = lib.licenses.mit;
     mainProgram = "fleur";
   };
