@@ -5,7 +5,7 @@ buildGoModule {
 
   src = ./.;
 
-  vendorHash = "sha256-w50DtGiFVP3g59927fgOoNNIBzEm0yv1q+GXk4G0PKI=";
+  vendorHash = "sha256-3Glc/5N4/Liq//AHJHwMNbRABoPfjDZxqXZqt6AG0CA=";
 
   ldflags = [
     "-s"
