@@ -13,5 +13,6 @@ you can use the link below. Your submission will be reviewed.
 1Add your gopherspace	/webring/form	localhost	7070
 
 7Remove your gopherspace with its associated token	/webring/delete	localhost	7070
+7Review pending gopherspaces	/webring/adminpanel	localhost	7070
 
 >members

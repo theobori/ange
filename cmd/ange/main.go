@@ -245,7 +245,7 @@ func main() {
 	)
 
 	router := server.NewRouter()
-	err = fleurform.AddFormToRouter(
+	err = fleurform.Apply(
 		router,
 		"/webring",
 		[]fleurform.ParameterMetadata{
@@ -271,7 +271,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = fleurform.AddFormToRouter(
+	err = fleurform.Apply(
 		router,
 		"/webring/adminpanel",
 		[]fleurform.ParameterMetadata{
@@ -309,6 +309,14 @@ func main() {
 		1,
 		"^/webring/adminpanel$",
 		func(server *server.Server, ctx *server.RequestContext) error {
+			if len(ctx.SearchParameter) == 0 {
+				return server.SendError(ctx.Conn, "Missing search parameter.")
+			}
+
+			if ctx.SearchParameter != secret {
+				return server.SendError(ctx.Conn, "You must be admin.")
+			}
+
 			entryList, err := RenderGopherspacesList(w, false)
 			if err != nil {
 				return err

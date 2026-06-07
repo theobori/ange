@@ -8,3 +8,5 @@ github.com/theobori/fleur v0.0.0-20260607093716-c2c01ddbccc1 h1:/2Xh+IBX18T5QLDk
 github.com/theobori/fleur v0.0.0-20260607093716-c2c01ddbccc1/go.mod h1:T7TyKrl7UKWTxX2VUquyawyA3bARTd4nh4D5RaDvnlI=
 github.com/theobori/fleur-form v0.0.0-20260607094312-9317e7edd5a1 h1:gvtoGJEllsJSY+j9ziZl5QnUdfISBa2KES4OnKa64mI=
 github.com/theobori/fleur-form v0.0.0-20260607094312-9317e7edd5a1/go.mod h1:+bHcuryY28j0pamS2lvA8koNW8f6/PPovPkt4p2PuOg=
+github.com/theobori/fleur-form v0.0.0-20260607134817-f43d4628aeb6 h1:QJp1YpdrRNgMdvF6tCGyVkoujcEMNhSYyGxxXa6iYd8=
+github.com/theobori/fleur-form v0.0.0-20260607134817-f43d4628aeb6/go.mod h1:+bHcuryY28j0pamS2lvA8koNW8f6/PPovPkt4p2PuOg=
