@@ -52,7 +52,7 @@ As a user, I highly recommend [lagrange](https://gmi.skyjake.fi/lagrange/)
 
 ## How it works
 
-The system is intentionally quite simple. The chain of GopherSpaces is stored persistently using [SQLite3](https://sqlite.org/). Users can perform operations on the webring via Gopher requests specifying specific paths.
+The system is intentionally quite simple. The chain of Gopherspaces is stored persistently using [SQLite3](https://sqlite.org/). Users can perform operations on the webring via Gopher requests specifying specific paths.
 
 Each node of the webring has a unique ID and a unique token. The token can be used by the users to remove their gopherspace from the webring.
 
@@ -66,8 +66,8 @@ Below is a table showing the main routes and the associated operations on the we
 | /webring/adminpanel | Administration panel for reviewing webrings. |
 | /webring/adminpanel/form | Page with a form to approve or deny pending Gopherspaces. |
 | /webring/delete | Page to delete your Gopherspace. |
-| /webring/previous | View the previous Gopherspace relative to another. |
-| /webring/next | View the next Gopherspace relative to another. |
+| /webring/previous/<id> | View the previous Gopherspace relative to another. |
+| /webring/next/<id> | View the next Gopherspace relative to another. |
 | /webring/random | View a random Gopherspace from the webring. |
 | Default route | By default, the application will serve a file named `gophermap`, which should be placed in the root of the directory specified as a CLI option. See [gophermap.example](/gophermap.example) |
 
