@@ -1,5 +1,9 @@
 package webring
 
+import (
+	"github.com/theobori/ange/internal/hash"
+)
+
 func (d *Database) deleteFromWebring(id int, previous int, next int) error {
 	tx, err := d.db.Begin()
 	if err != nil {
@@ -55,12 +59,14 @@ func (d *Database) DeleteByTokenFromWebring(token string) error {
 		id       int
 	)
 
+	tokenHash := hash.Generate(token)
+
 	err = d.db.QueryRow(
 		`SELECT gopherspace_id, previous, next
 		FROM webring
 		INNER JOIN gopherspaces on gopherspaces.id = webring.gopherspace_id
 		WHERE gopherspaces.token = ?`,
-		token,
+		tokenHash,
 	).Scan(&id, &previous, &next)
 	if err != nil {
 		return err

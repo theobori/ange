@@ -1,15 +1,21 @@
 package webring
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/theobori/ange/internal/hash"
+)
 
 func (d *Database) AddGopherspace(gopherspace *Gopherspace) (int, error) {
+	tokenHash := hash.Generate(gopherspace.Token)
+
 	result, err := d.db.Exec(
 		`INSERT INTO gopherspaces(title, domain, port, path, token) VALUES(?, ?, ?, ?, ?)`,
 		gopherspace.Title,
 		gopherspace.Domain,
 		gopherspace.Port,
 		gopherspace.Path,
-		gopherspace.Token,
+		tokenHash,
 	)
 	if err != nil {
 		return -1, err

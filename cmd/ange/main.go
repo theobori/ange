@@ -9,7 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/theobori/ange/internal/common"
+	"github.com/theobori/ange/internal/hash"
+	"github.com/theobori/ange/internal/random"
 	"github.com/theobori/ange/internal/webring"
 	fleurform "github.com/theobori/fleur-form"
 	"github.com/theobori/fleur/gopher"
@@ -110,12 +111,11 @@ func createNeighborRouteCallback(w *webring.Webring, isNext bool) server.RouteCa
 	}
 }
 
-func RenderGopherspacesList(w *webring.Webring, approved bool) (string, error) {
+func renderGopherspacesList(w *webring.Webring, approved bool) (string, error) {
 	items := []*gophermap.Item{}
 
 	gopherspaces, err := w.ListGopherspaces(approved)
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 
@@ -148,6 +148,24 @@ func RenderGopherspacesList(w *webring.Webring, approved bool) (string, error) {
 	}
 
 	return gophermap.RenderMenu(items...), nil
+}
+
+func getSecret() (*hash.Hash, error) {
+	secretString, ok := os.LookupEnv("ANGE_SECRET")
+	if !ok {
+		secretString = random.Generate(32)
+		log.Println("It's recommended to set your own secret by setting the ANGE_SECRET environement variable.")
+		log.Println("A secret has been automatically generated for you:")
+		log.Println(secretString)
+	}
+
+	if len(secretString) < 10 {
+		return nil, fmt.Errorf("Your secret should have at least a size of 10.")
+	}
+
+	secret := hash.NewHash(secretString)
+
+	return secret, nil
 }
 
 func main() {
@@ -197,16 +215,9 @@ func main() {
 		log.Fatalln("The port should at least be a positive integer.")
 	}
 
-	secret, ok := os.LookupEnv("ANGE_SECRET")
-	if !ok {
-		secret = common.GenerateToken(32)
-		log.Println("It's recommended to set your own secret by setting the ANGE_SECRET environement variable.")
-		log.Println("A secret has been automatically generated for you:")
-		log.Println(secret)
-	}
-
-	if len(secret) < 10 {
-		log.Fatalln("Your secret should have at least a size of 10.")
+	secret, err := getSecret()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	serverOptions, err := server.NewOptions(
@@ -240,7 +251,7 @@ func main() {
 	em.Set(
 		"^>members",
 		func(e *evaluator.Evaluator, ctx *evaluator.ExtensionContext) (string, error) {
-			return RenderGopherspacesList(w, true)
+			return renderGopherspacesList(w, true)
 		},
 	)
 
@@ -313,11 +324,11 @@ func main() {
 				return server.SendError(ctx.Conn, "Missing search parameter.")
 			}
 
-			if ctx.SearchParameter != secret {
+			if !w.IsAdmin(ctx.SearchParameter) {
 				return server.SendError(ctx.Conn, "You must be admin.")
 			}
 
-			entryList, err := RenderGopherspacesList(w, false)
+			entryList, err := renderGopherspacesList(w, false)
 			if err != nil {
 				return err
 			}
@@ -349,7 +360,7 @@ func main() {
 			return server.SendGophermap(
 				ctx.Conn,
 				gophermap.ItemTypeInlineText,
-				fmt.Sprintf("You successfully deleted the gopherspace with token '%s'.", token),
+				"You successfully deleted your gopherspace.",
 			)
 		},
 	)

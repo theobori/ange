@@ -3,7 +3,7 @@ package webring
 import (
 	"fmt"
 
-	"github.com/theobori/ange/internal/common"
+	"github.com/theobori/ange/internal/random"
 	"github.com/theobori/fleur/gophermap"
 )
 
@@ -22,12 +22,14 @@ func NewGopherspaceFromUserInput(title string, domain string, port int, path str
 		return nil, fmt.Errorf("Port must be a positive integer.")
 	}
 
+	token := random.Generate(32)
+
 	return &Gopherspace{
 		Title:    title,
 		Domain:   domain,
 		Port:     port,
 		Path:     path,
-		Token:    common.GenerateToken(32),
+		Token:    token,
 		Approved: false,
 	}, nil
 }

@@ -2,20 +2,22 @@ package webring
 
 import (
 	"sync"
+
+	"github.com/theobori/ange/internal/hash"
 )
 
 const DatabasePerm = 0600
 
 type Webring struct {
-	database *Database
-	secret   string
-	mu       sync.Mutex
+	database   *Database
+	secretHash *hash.Hash
+	mu         sync.Mutex
 }
 
-func NewWebring(database *Database, secret string) (*Webring, error) {
+func NewWebring(database *Database, secretHash *hash.Hash) (*Webring, error) {
 	return &Webring{
-		database: database,
-		secret:   secret,
+		database:   database,
+		secretHash: secretHash,
 	}, nil
 }
 
@@ -46,7 +48,7 @@ func (w *Webring) ListGopherspaces(approved bool) ([]Gopherspace, error) {
 }
 
 func (w *Webring) IsAdmin(secret string) bool {
-	return secret == w.secret
+	return w.secretHash.Verify(secret)
 }
 
 func (w *Webring) Approve(id int) error {

@@ -1,11 +1,11 @@
-package common
+package random
 
 import (
 	"crypto/rand"
 	"fmt"
 )
 
-func GenerateToken(bytesAmount int) string {
+func Generate(bytesAmount int) string {
 	if bytesAmount < 0 {
 		bytesAmount = 1
 	}
