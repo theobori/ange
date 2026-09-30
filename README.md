@@ -36,8 +36,14 @@ Usage of ./ange:
     	It specifies an input directory path that will be the root of the Gopher server. (default "./")
   -domain string
     	Gopher domain. (default "localhost")
+  -enable-tls
+    	Enable Gopher over TLS
   -port int
     	Gopher port. (default 70)
+  -tls-certificate string
+    	x509 certificate path used for the TLS communication
+  -tls-key string
+    	Private key path used for the TLS communication
   -verbose
     	Enable verbose logs.
 ```
@@ -48,7 +54,7 @@ You can set a value for the `ANGE_SECRET` environment variable, which will then 
 
 ### Recommended client
 
-As a user, I highly recommend [lagrange](https://gmi.skyjake.fi/lagrange/)
+As a user, I highly recommend [lagrange](https://gmi.skyjake.fi/lagrange/).
 
 ## How it works
 
@@ -77,7 +83,7 @@ In your `gophermap` file, you can use the `>members` syntax element to display t
 
 ## Security recommendation
 
-It is strongly recommended that you add an encryption layer in front of the Gopher server for this project, as sensitive data such as tokens is exchanged. For example, TLS, there are clients that support Gopher over TLS, as well as techniques for implementing a TLS layer.
+I strongly recommend that you use only Gopher over TLS, as the data exchanges may contain sensitive information such as tokens.
 
 ## Contribute
 

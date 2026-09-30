@@ -6,5 +6,7 @@ github.com/mattn/go-sqlite3 v1.14.45 h1:6KA/spDguL3KV8rnybG7ezSaE4SeMR3KC9VbUoAQ
 github.com/mattn/go-sqlite3 v1.14.45/go.mod h1:pjEuOr8IwzLJP2MfGeTb0A35jauH+C2kbHKBr7yXKVQ=
 github.com/theobori/fleur v0.0.0-20260607093716-c2c01ddbccc1 h1:/2Xh+IBX18T5QLDkpf3fy6sXscJv6rozS/F9Azka0/o=
 github.com/theobori/fleur v0.0.0-20260607093716-c2c01ddbccc1/go.mod h1:T7TyKrl7UKWTxX2VUquyawyA3bARTd4nh4D5RaDvnlI=
+github.com/theobori/fleur v0.0.0-20260930160031-4b5b305ab674 h1:xjICyj4B/8k9CKwVmxN0M1J2vn7QJ6iTNHo8zJCycIg=
+github.com/theobori/fleur v0.0.0-20260930160031-4b5b305ab674/go.mod h1:T7TyKrl7UKWTxX2VUquyawyA3bARTd4nh4D5RaDvnlI=
 github.com/theobori/fleur-form v0.0.0-20260607134817-f43d4628aeb6 h1:QJp1YpdrRNgMdvF6tCGyVkoujcEMNhSYyGxxXa6iYd8=
 github.com/theobori/fleur-form v0.0.0-20260607134817-f43d4628aeb6/go.mod h1:+bHcuryY28j0pamS2lvA8koNW8f6/PPovPkt4p2PuOg=
