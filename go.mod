@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/mattn/go-sqlite3 v1.14.45
-	github.com/theobori/fleur v0.0.0-20260930160031-4b5b305ab674
+	github.com/theobori/fleur v0.0.0-20261004170611-510aded795ad
 	github.com/theobori/fleur-form v0.0.0-20260607134817-f43d4628aeb6
 )
 

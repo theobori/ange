@@ -14,7 +14,6 @@ import (
 	"github.com/theobori/ange/internal/webring"
 	fleurform "github.com/theobori/fleur-form"
 	"github.com/theobori/fleur/gopher"
-	gserver "github.com/theobori/fleur/gopher/server"
 	"github.com/theobori/fleur/gophermap"
 	"github.com/theobori/fleur/gophermap/evaluator"
 	"github.com/theobori/fleur/server"
@@ -47,7 +46,7 @@ func createWebringSubmitCallback(w *webring.Webring) fleurform.SubmitCallback {
 			server.NewItem(gophermap.ItemTypeInlineText, fmt.Sprintf("Your token: %s", gopherspace.Token), "/"),
 		)
 
-		return gserver.SendString(ctx.Conn, menu)
+		return server.SendString(ctx.Conn, menu)
 	}
 }
 
@@ -104,7 +103,7 @@ func createNeighborRouteCallback(w *webring.Webring, isNext bool) server.RouteCa
 			return err
 		}
 
-		return gserver.SendString(
+		return server.SendString(
 			ctx.Conn,
 			gopherspace.GophermapItem().String(),
 		)
@@ -363,7 +362,7 @@ func main() {
 				server.NewItem(gophermap.ItemTypeInlineText, "", "/"),
 			) + "\n" + entryList
 
-			return gserver.SendString(ctx.Conn, menu)
+			return server.SendString(ctx.Conn, menu)
 		},
 	)
 	router.SetWithWeight(
@@ -407,7 +406,7 @@ func main() {
 				return err
 			}
 
-			return gserver.SendString(
+			return server.SendString(
 				ctx.Conn,
 				gopherspace.GophermapItem().String(),
 			)
